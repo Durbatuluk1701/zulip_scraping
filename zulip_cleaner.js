@@ -1,18 +1,52 @@
 /**
- * Zulip Cleaner
- * This script cleans up Zulpi channel topics by collapsing them into a single markdown blob
- * Steps:
- * 1. Read in the Zulip channel scraped data from a JSON file.
- * (The schema is { <key>topic: [{ sender: string, content : string }]})
- * 2. Collapse the topics into a single markdown blob. 
- * This will be achieved by:
- *   - Iterating through each topic.
- *   - For each topic, iterating through each message.
- *   - For each message, appending the sender and content to a markdown string in the format (<sender>: <content>).
- *    - Note: If multiple messages are from the same sender, they will be concatenated.
- * 3. Write the new format to a new JSON file of schema ({ <key>topic: markdown_blob })
+ * Zulip Data Cleaner (Stage 2 of 3)
+ * =================================
  * 
- * Usage: node zulip_cleaner.js <input_file> <output_file>
+ * This script processes raw Zulip scraped data and consolidates messages into markdown format.
+ * It's the second stage in the Zulip processing pipeline.
+ * 
+ * PIPELINE OVERVIEW:
+ * Stage 1: zulip_scraper.js  → Raw JSON data 
+ * Stage 2: zulip_cleaner.js  → Cleaned markdown per topic ← YOU ARE HERE
+ * Stage 3: data_splitter.js  → Individual markdown files
+ * 
+ * WHAT THIS SCRIPT DOES:
+ * 1. Reads raw scraped JSON data with message arrays per topic
+ * 2. Merges consecutive messages from the same sender 
+ * 3. Converts each topic's messages into a single markdown blob
+ * 4. Outputs cleaned data ready for splitting into individual files
+ * 
+ * INPUT FORMAT:
+ * {
+ *   "topic_name": [
+ *     { "sender": "alice", "content": "First message" },
+ *     { "sender": "alice", "content": "Continuation" },
+ *     { "sender": "bob", "content": "Reply" }
+ *   ]
+ * }
+ * 
+ * OUTPUT FORMAT:
+ * {
+ *   "topic_name": "**alice:** First message\n\nContinuation\n\n**bob:** Reply"
+ * }
+ * 
+ * FEATURES:
+ * - Smart message consolidation (merges consecutive messages from same sender)
+ * - Preserves conversation flow and context
+ * - Clean markdown formatting with proper spacing
+ * - Automatic directory creation
+ * - Progress tracking and error handling
+ * 
+ * USAGE:
+ * node zulip_cleaner.js <input_file> <output_file>
+ * 
+ * EXAMPLES:
+ * node zulip_cleaner.js data/messages.json cleaned_data/messages_cleaned.json
+ * node zulip_cleaner.js data/rocq_ltac2_zulip_messages.json cleaned_data/rocq_ltac2_cleaned.json
+ * 
+ * NEXT STEPS:
+ * After cleaning, use data_splitter.js to create individual markdown files:
+ * node data_splitter.js cleaned_data/your_file_cleaned.json markdown_files/
  */
 
 const fs = require('fs');
@@ -24,7 +58,7 @@ const path = require('path');
  */
 function parseArguments() {
   const args = process.argv.slice(2);
-  
+
   if (args.length < 2) {
     console.error('❌ Error: Missing required arguments');
     console.log('Usage: node zulip_cleaner.js <input_file> <output_file>');

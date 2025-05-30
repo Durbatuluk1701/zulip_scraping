@@ -1,15 +1,55 @@
 /**
- * Data Splitter
- * Convert a given file "input_file" into various markdown files
- * 1. Parse in the input file in schema ({ <key>header: <value>markdown_content })
- * 2. For each of the entries, print them to a markdown file `header.md` in the format:
- * """
- * # <header>
+ * Data Splitter (Stage 3 of 3)
+ * ============================
  * 
- * <markdown_content>
- * """
+ * This script converts cleaned Zulip data into individual markdown files for each topic.
+ * It's the final stage in the Zulip processing pipeline.
  * 
- * Usage: node data_splitter.js <input_file> [output_directory]
+ * PIPELINE OVERVIEW:
+ * Stage 1: zulip_scraper.js  → Raw JSON data 
+ * Stage 2: zulip_cleaner.js  → Cleaned markdown per topic
+ * Stage 3: data_splitter.js  → Individual markdown files ← YOU ARE HERE
+ * 
+ * WHAT THIS SCRIPT DOES:
+ * 1. Reads cleaned JSON data with markdown content per topic
+ * 2. Creates individual markdown files for each topic
+ * 3. Sanitizes topic names for safe filenames
+ * 4. Organizes files in a specified output directory
+ * 
+ * INPUT FORMAT:
+ * {
+ *   "topic_name": "**alice:** First message\n\nContinuation\n\n**bob:** Reply"
+ * }
+ * 
+ * OUTPUT FORMAT:
+ * Individual .md files with format:
+ * ```markdown
+ * # Topic Name
+ * 
+ * **alice:** First message
+ * 
+ * Continuation
+ * 
+ * **bob:** Reply
+ * ```
+ * 
+ * FEATURES:
+ * - Automatic filename sanitization (removes invalid characters)
+ * - Cross-platform compatible filenames
+ * - Proper markdown header formatting
+ * - Automatic directory creation
+ * - Progress tracking and error handling
+ * 
+ * USAGE:
+ * node data_splitter.js <input_file> [output_directory]
+ * 
+ * EXAMPLES:
+ * node data_splitter.js cleaned_data/messages_cleaned.json
+ * node data_splitter.js cleaned_data/rocq_ltac2_cleaned.json markdown_files/
+ * 
+ * RESULT:
+ * Creates browsable markdown files perfect for documentation, search, and reference.
+ * Each topic becomes a standalone file that can be easily shared or integrated into docs.
  */
 
 const fs = require('fs');

@@ -1,3 +1,43 @@
+/**
+ * Zulip Channel Scraper (Stage 1 of 3)
+ * ===================================
+ * 
+ * This browser script scrapes all messages from a Zulip channel and downloads them as JSON.
+ * It's the first stage in the Zulip processing pipeline.
+ * 
+ * PIPELINE OVERVIEW:
+ * Stage 1: zulip_scraper.js  → Raw JSON data 
+ * Stage 2: zulip_cleaner.js  → Cleaned markdown per topic
+ * Stage 3: data_splitter.js  → Individual markdown files
+ * 
+ * USAGE INSTRUCTIONS:
+ * 1. Navigate to the Zulip channel you want to scrape
+ * 2. Scroll to the TOP of the channel (very important!)
+ * 3. Open browser developer console (F12)
+ * 4. Copy and paste this entire script into the console
+ * 5. Press Enter and wait for completion
+ * 6. Script will automatically download a JSON file
+ * 
+ * FEATURES:
+ * - Automatically loads required dependencies (Turndown.js)
+ * - Handles pagination and infinite scrolling
+ * - Converts HTML content to clean markdown
+ * - Rate limiting to avoid server overload
+ * - Progress indicators and error handling
+ * 
+ * OUTPUT FORMAT:
+ * {
+ *   "topic_name": [
+ *     { "sender": "username", "content": "message content in markdown" },
+ *     { "sender": "username", "content": "another message" }
+ *   ]
+ * }
+ * 
+ * NEXT STEPS:
+ * After downloading, use zulip_cleaner.js to process the raw data:
+ * node zulip_cleaner.js your_scraped_file.json cleaned_data/your_file_cleaned.json
+ */
+
 function loadTurndownScript() {
   return new Promise((resolve, reject) => {
     // Check if TurndownService is already available
