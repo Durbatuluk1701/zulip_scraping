@@ -298,10 +298,10 @@ async function rest() {
     // Wait for scroll to complete, then rec call
     const waitTime = 5000;
     console.log(`Waiting ${waitTime}ms for scroll to complete...`);
-    setTimeout(() => {
-      console.log("Scroll completed, fetching new rows...");
-      processRows(); // Recursively call to process the next set of rows
-    }, waitTime);
+    await new Promise(resolve => setTimeout(resolve, waitTime));
+
+    console.log("Scroll completed, fetching new rows...");
+    await processRows(); // Recursively call to process the next set of rows
   }
   await processRows(); // Start processing rows
 
