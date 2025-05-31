@@ -4,16 +4,17 @@ A comprehensive toolkit for scraping, cleaning, and organizing Zulip channel dat
 
 ## 🔄 Pipeline Overview
 
-This toolkit follows a three-stage process:
+This toolkit follows a four-stage process:
 
 1. **🕷️ Scraping**: Extract raw messages from Zulip channels using browser automation
 2. **🧹 Cleaning**: Process and consolidate messages into markdown format
 3. **📄 Splitting**: Generate individual markdown files for each topic
+4. **📦 Compacting**: Group individual files into manageable collections _(optional)_
 
 ```
-Zulip Channel → Raw JSON → Cleaned JSON → Individual Markdown Files
-     ↓              ↓            ↓               ↓
-[zulip_scraper] → [zulip_cleaner] → [data_splitter] → [markdown_files/]
+Zulip Channel → Raw JSON → Cleaned JSON → Individual Files → Grouped Files
+     ↓              ↓            ↓               ↓              ↓
+[zulip_scraper] → [zulip_cleaner] → [data_splitter] → [markdown_compactor] → [compacted/]
 ```
 
 ## 🚀 Quick Start
@@ -34,6 +35,9 @@ node zulip_cleaner.js data/your_channel_messages.json cleaned_data/your_channel_
 
 # 3. Split into individual markdown files
 node data_splitter.js cleaned_data/your_channel_cleaned.json markdown_files/
+
+# 4. (Optional) Compact into manageable groups
+node markdown_compactor.js markdown_files/ compacted/ 5
 ```
 
 ## 📖 Detailed Usage
@@ -127,6 +131,53 @@ Second message
 **bob:** Reply message
 ```
 
+### Stage 4: Compacting (`markdown_compactor.js`) _(Optional)_
+
+**Purpose**: Group individual markdown files into N manageable collections for easier navigation and organization.
+
+**Use Cases**:
+
+- Large numbers of topic files become unwieldy to browse
+- Need to create digestible chunks for documentation platforms
+- Want to reduce file count for certain tools or workflows
+- Create themed or sized groupings of related content
+
+**Features**:
+
+- Even distribution of files across N groups (by count)
+- Maintains original content and formatting
+- Clear separation with horizontal rules (`---`)
+- Descriptive filenames showing group info
+- Source file tracking with comments
+
+**Usage**:
+
+```bash
+node markdown_compactor.js <input_directory> <output_directory> <N>
+
+# Examples:
+node markdown_compactor.js markdown_files/ compacted/ 5
+node markdown_compactor.js docs/topics/ docs/grouped/ 10
+```
+
+**Output**: Creates files like `group_1_of_5_12_files.md` containing:
+
+```markdown
+<!-- Source: topic_1.md -->
+
+# Topic 1
+
+Content here...
+
+---
+
+<!-- Source: topic_2.md -->
+
+# Topic 2
+
+More content...
+```
+
 ## 📁 Project Structure
 
 ```
@@ -134,10 +185,12 @@ zulip_scraping/
 ├── zulip_scraper.js       # Browser script for scraping
 ├── zulip_cleaner.js       # Node.js script for cleaning data
 ├── data_splitter.js       # Node.js script for splitting topics
+├── markdown_compactor.js  # Node.js script for grouping files
 ├── README.md              # This documentation
 ├── data/                  # Raw scraped JSON files
 ├── cleaned_data/          # Processed JSON files
-└── markdown_files/        # Final markdown output
+├── markdown_files/        # Individual topic files
+└── compacted/             # Grouped markdown files
 ```
 
 ## ⚙️ Configuration & Options
@@ -159,6 +212,13 @@ zulip_scraping/
 - Sanitizes topic names for safe filenames
 - Supports custom output directories
 - Handles special characters and Unicode in topic names
+
+### Markdown Compactor
+
+- Even distribution of files across groups (by file count)
+- Maintains original formatting and adds source tracking
+- Horizontal rule separators between combined files
+- Descriptive group filenames with statistics
 
 ## 🛠️ Troubleshooting
 
@@ -184,6 +244,12 @@ zulip_scraping/
 
 - Check that the scraped file is valid JSON
 - Re-run the scraper if the file appears corrupted
+
+**Too many individual files**:
+
+- Use the compactor script to group files into manageable collections
+- Adjust the number of groups (N) based on your needs
+- Consider organizing by topic themes before compacting
 
 ## 📄 License
 
